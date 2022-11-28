@@ -6,7 +6,9 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -38,7 +40,16 @@ public final class LambdaFilter extends JFrame {
         /**
          * Commands.
          */
-        IDENTITY("No modifications", Function.identity());
+        IDENTITY("No modifications", Function.identity()),
+        TO_LOWER("Lowercase", String::toLowerCase),
+        CHARS_NUM("Characters count", s -> String.valueOf(s.length())),
+        LINES_NUM("Lines count", s -> String.valueOf(s.lines().count())),   //FIXME doesn't count blank new lines, counts +1 after two \n.
+        ALPHA_ORDER("Alphabetical order listing", s ->
+            Arrays.stream(s.split("\n"))     //FIXME only works with \n. Add regex?
+                    .sorted()
+                    .collect(Collectors.joining("\n"))
+        ),
+        WORD_COUNT("Word count", s -> null);    //TODO
 
         private final String commandName;
         private final Function<String, String> fun;
