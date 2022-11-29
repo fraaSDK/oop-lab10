@@ -36,6 +36,7 @@ public final class LambdaFilter extends JFrame {
 
     private static final long serialVersionUID = 1760990730218643730L;
     private static final String REGEX = "\\W+";
+    private static final int KEEP_EMPTY_STR = -1;
 
     private enum Command {
         /**
@@ -44,14 +45,7 @@ public final class LambdaFilter extends JFrame {
         IDENTITY("No modifications", Function.identity()),
         TO_LOWER("Lowercase", String::toLowerCase),
         CHARS_NUM("Characters count", s -> String.valueOf(s.length())),
-        /*
-         * A line is either a sequence of zero or more characters followed by a line terminator,
-         * or it is a sequence of one or more characters followed by the end of the string.
-         * A line does not include the line terminator.
-         * 
-         * Side-effect: an empty line without the line terminator won't count as a line.
-         */
-        LINES_NUM("Lines count", s -> String.valueOf(s.lines().count())),
+        LINES_NUM("Lines count", s -> Long.toString(Arrays.stream(s.split("\n", KEEP_EMPTY_STR)).count())),
         ALPHA_ORDER("Alphabetical order listing", s ->
             Arrays.stream(s.split(REGEX))
                     .sorted()
