@@ -35,6 +35,7 @@ import javax.swing.JTextArea;
 public final class LambdaFilter extends JFrame {
 
     private static final long serialVersionUID = 1760990730218643730L;
+    private static final String REGEX = "\\W+";
 
     private enum Command {
         /**
@@ -43,13 +44,27 @@ public final class LambdaFilter extends JFrame {
         IDENTITY("No modifications", Function.identity()),
         TO_LOWER("Lowercase", String::toLowerCase),
         CHARS_NUM("Characters count", s -> String.valueOf(s.length())),
-        LINES_NUM("Lines count", s -> String.valueOf(s.lines().count())),   //FIXME doesn't count blank new lines, counts +1 after two \n.
+        /*
+         * A line is either a sequence of zero or more characters followed by a line terminator,
+         * or it is a sequence of one or more characters followed by the end of the string.
+         * A line does not include the line terminator.
+         * 
+         * Side-effect: an empty line without the line terminator won't count as a line.
+         */
+        LINES_NUM("Lines count", s -> String.valueOf(s.lines().count())),
         ALPHA_ORDER("Alphabetical order listing", s ->
-            Arrays.stream(s.split("\n"))     //FIXME only works with \n. Add regex?
+            Arrays.stream(s.split(REGEX))
                     .sorted()
                     .collect(Collectors.joining("\n"))
         ),
-        WORD_COUNT("Word count", s -> null);    //TODO
+        WORD_COUNT("Word count", s ->
+            Arrays.stream(s.split(REGEX))
+                    // The collector produces a Map<K, D>
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                    .entrySet().stream()
+                    .map(m -> m.getKey() + " -> " + m.getValue())
+                    .collect(Collectors.joining("\n"))
+        );
 
         private final String commandName;
         private final Function<String, String> fun;
